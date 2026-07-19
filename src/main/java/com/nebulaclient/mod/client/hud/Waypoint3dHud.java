@@ -49,7 +49,7 @@ public class Waypoint3dHud {
         if (visible.isEmpty()) return;
 
         Camera cam = client.gameRenderer.getCamera();
-        Vec3d camPos = cam.getPos();
+        Vec3d camPos = cam.getCameraPos();
         double yawR = Math.toRadians(cam.getYaw());
         double pitchR = Math.toRadians(cam.getPitch());
 
