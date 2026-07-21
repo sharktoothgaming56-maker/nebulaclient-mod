@@ -8,7 +8,7 @@ import net.minecraft.client.gui.screen.multiplayer.AddServerScreen;
 import net.minecraft.client.gui.screen.multiplayer.DirectConnectScreen;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.network.ServerList;
+import net.minecraft.client.option.ServerList; // client.option, not client.network — verified against the 1.21.11 Yarn javadoc
 import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -93,7 +93,8 @@ public class NebulaServerListScreen extends SpaceTheme.SpaceScreen {
         int fy = this.height - 54;
         nebulaButtons.add(new SpaceTheme.NebulaButton(panelX(), fy, third, 20, "Join", this::joinSelected));
         nebulaButtons.add(new SpaceTheme.NebulaButton(panelX() + third + 4, fy, third, 20, "Add",
-                () -> this.client.setScreen(new AddServerScreen(this, this::onServerAdded, new ServerInfo("Minecraft Server", "", ServerInfo.ServerType.OTHER)))));
+                () -> this.client.setScreen(new AddServerScreen(this, Text.literal("Add Server"), this::onServerAdded,
+                        new ServerInfo("Minecraft Server", "", ServerInfo.ServerType.OTHER)))));
         nebulaButtons.add(new SpaceTheme.NebulaButton(panelX() + (third + 4) * 2, fy, third, 20, "Direct",
                 () -> this.client.setScreen(new DirectConnectScreen(this, this::onDirectConnect, new ServerInfo("Minecraft Server", "", ServerInfo.ServerType.OTHER)))));
 
