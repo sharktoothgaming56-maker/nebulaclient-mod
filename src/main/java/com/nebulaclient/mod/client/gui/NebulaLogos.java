@@ -1,0 +1,44 @@
+package com.nebulaclient.mod.client.gui;
+
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.util.Identifier;
+
+/**
+ * Draws the two supplied PNG logos (bundled under
+ * assets/nebulaclient/textures/gui) centred and scaled: the NEBULACLIENT
+ * wordmark on the title screen, and the GAME MENU wordmark on the pause
+ * menu. Uses the same GUI_TEXTURED draw path the effects HUD already uses,
+ * with the 13-arg scaled drawTexture so the source PNG can be drawn at any
+ * on-screen size while keeping its aspect ratio.
+ */
+public final class NebulaLogos {
+    public static final Identifier TITLE = Identifier.of("nebulaclient", "textures/gui/title_logo.png");
+    public static final Identifier GAME_MENU = Identifier.of("nebulaclient", "textures/gui/game_menu_logo.png");
+
+    // Native pixel sizes of the supplied PNGs (used for aspect ratio).
+    public static final int TITLE_W = 663, TITLE_H = 123;
+    public static final int GAME_MENU_W = 506, GAME_MENU_H = 118;
+
+    private NebulaLogos() {}
+
+    /**
+     * Draw a logo centred horizontally on cx, with its TOP at y, scaled so
+     * its width is targetWidth (height follows to keep aspect ratio).
+     */
+    public static void drawCentered(DrawContext ctx, Identifier tex, int srcW, int srcH, int cx, int y, int targetWidth) {
+        int w = targetWidth;
+        int h = Math.max(1, (int) ((long) targetWidth * srcH / srcW));
+        int x = cx - w / 2;
+        // width/height = on-screen size; u,v = 0; regionWidth/Height sample
+        // the FULL native texture (srcW×srcH), and textureWidth/Height are
+        // the native texture size — so the whole PNG maps across the drawn
+        // rectangle at any target size.
+        ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex,
+                x, y, 0f, 0f,
+                w, h,          // on-screen size
+                srcW, srcH,    // region sampled (full texture)
+                srcW, srcH,    // full texture size
+                0xFFFFFFFF);
+    }
+}
