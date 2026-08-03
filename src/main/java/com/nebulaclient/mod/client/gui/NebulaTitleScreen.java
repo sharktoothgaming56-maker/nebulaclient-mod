@@ -1,0 +1,89 @@
+package com.nebulaclient.mod.client.gui;
+
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
+import net.minecraft.client.gui.screen.option.OptionsScreen; // NOTE: same package caveat as NebulaGameMenuScreen — verify against your build.
+import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.text.Text;
+
+/**
+ * Custom main menu. Buttons size off the responsive panel helpers so they
+ * grow/shrink with the window, matching the pause menu. Adds a Nebula Menu
+ * button so the client's settings are reachable straight from the title
+ * screen (opened with parent = this title screen so Back returns here).
+ */
+public class NebulaTitleScreen extends SpaceTheme.SpaceScreen {
+    /** Other mods' title-screen buttons, re-hosted here (see ModCompat). */
+    private final java.util.List<net.minecraft.client.gui.widget.ClickableWidget> modExtras;
+
+    public NebulaTitleScreen() {
+        this(java.util.List.of());
+    }
+
+    public NebulaTitleScreen(java.util.List<net.minecraft.client.gui.widget.ClickableWidget> modExtras) {
+        super(Text.literal("NebulaClient"));
+        this.modExtras = modExtras;
+    }
+
+    @Override
+    protected boolean opaqueBackground() {
+        return true; // full starfield — nothing behind the title screen to show through
+    }
+
+    @Override
+    protected boolean showWordmark() {
+        return false; // the big logo IS the branding here, no corner mark needed
+    }
+
+    @Override
+    protected void init() {
+        nebulaButtons.clear();
+        int w = panelWidth();
+        int y = this.height / 2 - 25;
+
+        SpaceTheme.NebulaButton single = new SpaceTheme.NebulaButton(panelX(), y, w, 22, "Singleplayer",
+                () -> this.client.setScreen(new SelectWorldScreen(this)));
+        single.bold = true;
+        nebulaButtons.add(single);
+        y += 26;
+        SpaceTheme.NebulaButton multi = new SpaceTheme.NebulaButton(panelX(), y, w, 22, "Multiplayer",
+                () -> this.client.setScreen(new MultiplayerScreen(this)));
+        multi.bold = true;
+        nebulaButtons.add(multi);
+        y += 26;
+        nebulaButtons.add(new SpaceTheme.NebulaButton(leftColX(), y, halfWidth(), 22, "Options...",
+                () -> this.client.setScreen(new OptionsScreen(this, this.client.options))));
+        nebulaButtons.add(new SpaceTheme.NebulaButton(rightColX(), y, halfWidth(), 22, "Nebula Menu",
+                () -> this.client.setScreen(new NebulaMenuScreen(this))));
+        y += 26;
+        nebulaButtons.add(new SpaceTheme.NebulaButton(panelX(), y, w, 22, "Quit",
+                () -> this.client.scheduleStop()));
+
+        // Buttons other mods added to the vanilla title screen, kept alive
+        // in a column down the left edge. They're the mods' own widgets, so
+        // they look and behave exactly as that mod intended.
+        ModCompat.layout(modExtras, panelX(), this.height);
+        for (var widget : modExtras) {
+            this.addDrawableChild(widget);
+        }
+    }
+
+    @Override
+    protected void renderContent(DrawContext ctx, int mouseX, int mouseY, float delta) {
+        int cx = this.width / 2;
+        int ty = this.height / 4;
+        // Soft halo, then the supplied NEBULA CLIENT logo image. Pure
+        // percentage sizing (capped only by a height share) so the layout
+        // keeps the same proportions whether the window is fullscreen,
+        // half the desktop, or a small floating box — everything just
+        // scales together. The halo scales with the logo for the same
+        // reason.
+        int logoW = (int) (this.width * 0.42f);
+        int maxByHeight = (int) (this.height * 0.24f * NebulaLogos.TITLE_W / (float) NebulaLogos.TITLE_H);
+        logoW = Math.max(40, Math.min(logoW, maxByHeight));
+        SpaceTheme.drawGlowDisc(ctx, cx, ty + 10, Math.max(16, (int) (logoW * 0.12f)), 157, 107, 255, 0.18f);
+        int logoH = (int) ((long) logoW * NebulaLogos.TITLE_H / NebulaLogos.TITLE_W);
+        int logoTop = ty - logoH / 2;
+        NebulaLogos.drawCentered(ctx, NebulaLogos.TITLE, NebulaLogos.TITLE_W, NebulaLogos.TITLE_H, cx, logoTop, logoW);
+    }
+}
